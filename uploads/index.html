@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kazuma | Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --maxw: 720px;
+
+      --bg-top: #0d1016;
+      --bg-bottom: #07080c;
+
+      --panel: rgba(20, 24, 32, 0.72);
+      --panel-solid: #141822;
+      --panel-border: rgba(255, 255, 255, 0.09);
+
+      --text: #e8eaee;
+      --muted: #969ba5;
+
+      --amber: #e8b45f;   /* warm star-gold accent */
+      --ice: #7fc4d6;     /* cool interactive accent */
+
+      --line: rgba(255, 255, 255, 0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+      background: var(--bg-bottom);
+    }
+
+    body {
+      color: var(--text);
+      font-family: 'DM Mono', 'Noto Sans JP', monospace;
+      font-weight: 400;
+      line-height: 1.8;
+      padding: 0 1.5rem;
+      /* Deep space: faint cool + warm nebula glows over a near-black base */
+      background:
+        radial-gradient(1200px 820px at 72% -8%, rgba(127, 196, 214, 0.10), transparent 60%),
+        radial-gradient(1000px 720px at 8% 108%, rgba(232, 180, 95, 0.06), transparent 55%),
+        linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+      background-attachment: fixed;
+    }
+
+    /* ── Starfield ── */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #ffffff;
+      opacity: 0.5;
+      animation: twinkle var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
+    }
+    .star--gold { background: #ffe0ad; }
+    .star--ice { background: #cdeef6; }
+    .star--bright { box-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.12; transform: scale(0.7); }
+      50%      { opacity: 0.9;  transform: scale(1); }
+    }
+
+    /* ── Scroll progress ── */
+    .scroll-progress {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.07);
+      z-index: 200;
+    }
+    .scroll-progress__bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: var(--sp, 0%);
+      background: linear-gradient(180deg, var(--ice) 0%, #b8c6d0 50%, var(--amber) 100%);
+      background-size: 3px 100vh;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+    }
+
+    /* ── Layout ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: var(--maxw);
+      margin: 0 auto;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards;
+      gap: 1rem;
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.6rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: #a9aeb8;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── Language switch ── */
+    .lang-toggle {
+      position: relative;
+      width: 60px;
+      height: 28px;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .lang-toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 27px;
+      height: 20px;
+      border-radius: 999px;
+      background: var(--text);
+      transition: transform 0.25s ease;
+    }
+
+    .lang-toggle[aria-pressed="true"] .lang-toggle-thumb {
+      transform: translateX(27px);
+    }
+
+    .lang-toggle-option {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      transition: color 0.25s ease;
+      user-select: none;
+    }
+
+    .lang-toggle[aria-pressed="false"] .lang-toggle-option--ja { color: #0d1016; }
+    .lang-toggle[aria-pressed="true"] .lang-toggle-option--en { color: #0d1016; }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 5rem 0 4rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.15s ease forwards;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -140px;
+      top: -110px;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      background:
+        repeating-radial-gradient(
+          circle at center,
+          rgba(127, 196, 214, 0.10) 0,
+          rgba(127, 196, 214, 0.10) 1px,
+          transparent 1px,
+          transparent 34px
+        ),
+        radial-gradient(circle at center, rgba(127, 196, 214, 0.12) 0%, rgba(127, 196, 214, 0) 65%);
+      pointer-events: none;
+    }
+
+    .hero > * { position: relative; z-index: 1; }
+
+    .hero-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a9aeb8;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.4rem, 8vw, 3.8rem);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.8rem;
+      text-shadow: 0 0 32px rgba(127, 196, 214, 0.18);
+    }
+
+    .hero-desc {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #c7cad0;
+      max-width: 480px;
+      line-height: 1.9;
+    }
+
+    /* ── Section ── */
+    section {
+      padding: 4rem 0;
+      border-top: 1px solid var(--line);
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    section:nth-of-type(1) { animation-delay: 0.2s; }
+    section:nth-of-type(2) { animation-delay: 0.3s; }
+    section:nth-of-type(3) { animation-delay: 0.35s; }
+    section:nth-of-type(4) { animation-delay: 0.4s; }
+    section:nth-of-type(5) { animation-delay: 0.4s; }
+
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #a9aeb8;
+      margin-bottom: 2rem;
+    }
+    .section-label::before {
+      content: "\2726";
+      margin-right: 0.7em;
+      font-size: 0.9em;
+      color: var(--amber);
+      opacity: 0.7;
+    }
+
+    /* ── About ── */
+    .about-text {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #d0d3d8;
+      line-height: 2;
+    }
+
+    /* ── Skills (horizontal marquees) ── */
+    .skill-marquees {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+
+    .skill-cat__label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #a9aeb8;
+      margin-bottom: 0.7rem;
+    }
+
+    .marquee {
+      position: relative;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+              mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+    }
+
+    /* Fallback / no-JS: plain horizontal scroll */
+    .chip-list {
+      display: flex;
+      gap: 0.7rem;
+      overflow-x: auto;
+      padding-bottom: 0.15rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .chip-list::-webkit-scrollbar { display: none; }
+
+    /* JS-enhanced: infinite auto-scroll */
+    .marquee.is-live { overflow: hidden; }
+    .marquee.is-live .chip-list {
+      overflow: visible;
+      width: max-content;
+      gap: 0;
+      flex-wrap: nowrap;
+      animation: marquee-scroll var(--dur, 40s) linear infinite;
+    }
+    .marquee-group {
+      display: flex;
+      gap: 0.7rem;
+      padding-right: 0.7rem;
+      flex: 0 0 auto;
+    }
+    .marquee.is-live.marquee--reverse .chip-list { animation-direction: reverse; }
+    .marquee.is-live:hover .chip-list { animation-play-state: paused; }
+
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* Hologram-projected chips */
+    .chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex: 0 0 auto;
+      padding: 0.5rem 0.95rem;
+      border: 1px solid rgba(127, 196, 214, 0.38);
+      border-radius: 999px;
+      background:
+        linear-gradient(180deg, rgba(127, 196, 214, 0.14), rgba(127, 196, 214, 0.05));
+      box-shadow:
+        0 0 0 1px rgba(127, 196, 214, 0.12),
+        0 0 14px rgba(127, 196, 214, 0.22),
+        inset 0 0 12px rgba(127, 196, 214, 0.10);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #d6f1f8;
+      text-shadow: 0 0 6px rgba(127, 196, 214, 0.55);
+      white-space: nowrap;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    /* scanline sheen */
+    .chip::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(180, 235, 245, 0.10) 0,
+          rgba(180, 235, 245, 0.10) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+      mix-blend-mode: screen;
+      opacity: 0.6;
+    }
+    .marquee:not(.is-live) .chip:hover,
+    .marquee.is-live:hover .chip:hover {
+      border-color: rgba(127, 196, 214, 0.7);
+      background: linear-gradient(180deg, rgba(127, 196, 214, 0.22), rgba(127, 196, 214, 0.09));
+      box-shadow:
+        0 0 0 1px rgba(127, 196, 214, 0.3),
+        0 0 22px rgba(127, 196, 214, 0.4),
+        inset 0 0 16px rgba(127, 196, 214, 0.16);
+    }
+    .chip img,
+    .chip svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+      flex: 0 0 auto;
+      /* keep each icon's own color, add a projected glow */
+      filter: drop-shadow(0 0 4px rgba(127, 196, 214, 0.55)) brightness(1.06);
+      opacity: 0.94;
+    }
+
+    /* subtle projector flicker for the whole stack */
+    .skill-marquees {
+      animation: holo-flicker 7s steps(1, end) infinite;
+    }
+    @keyframes holo-flicker {
+      0%, 100% { opacity: 1; }
+      41% { opacity: 1; }
+      42% { opacity: 0.88; }
+      43% { opacity: 0.97; }
+      44% { opacity: 0.92; }
+      45% { opacity: 1; }
+      78% { opacity: 1; }
+      79% { opacity: 0.9; }
+      80% { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .marquee.is-live .chip-list {
+        animation: none;
+        width: auto;
+        overflow-x: auto;
+      }
+      .skill-marquees { animation: none; }
+      .chip::after { opacity: 0.4; }
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.2rem 0.6rem;
+      color: #dcdfe4;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Projects ── */
+    .projects {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .project-entry {
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    @supports (backdrop-filter: blur(6px)) {
+      .project-entry { backdrop-filter: blur(6px); }
+    }
+
+    .project-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 1rem;
+      padding: 1.6rem 1.6rem 1.1rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .project-head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .project-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      margin-bottom: 0;
+      color: #f4f5f7;
+    }
+
+    /* Where the product was built — separate from stack / status tags */
+    .project-place {
+      align-self: center;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1;
+      white-space: nowrap;
+      padding: 0.24rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .project-place::before {
+      content: "\25C8";
+      margin-right: 0.4em;
+      font-size: 0.9em;
+      opacity: 0.7;
+    }
+    .project-place--hackathon {
+      color: #f0c07a;
+      background: rgba(232, 180, 95, 0.14);
+      border-color: rgba(232, 180, 95, 0.42);
+    }
+    .project-place--personal {
+      color: #9dd6e4;
+      background: rgba(127, 196, 214, 0.14);
+      border-color: rgba(127, 196, 214, 0.42);
+    }
+    .project-place--intern {
+      color: #c7b1ec;
+      background: rgba(183, 156, 224, 0.16);
+      border-color: rgba(183, 156, 224, 0.44);
+    }
+    .project-place--team {
+      color: #a3d9b1;
+      background: rgba(143, 206, 159, 0.14);
+      border-color: rgba(143, 206, 159, 0.42);
+    }
+
+    .project-desc {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #c3c7ce;
+      line-height: 1.8;
+      margin-bottom: 0.7rem;
+      max-width: 62ch;
+    }
+
+    .project-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .project-stack .tag {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.12rem 0.5rem;
+      color: #aeb3bd;
+      background: transparent;
+      border: 1px solid var(--line);
+    }
+
+    .tag--wip {
+      color: #e0b877 !important;
+      border-color: rgba(224, 184, 119, 0.4) !important;
+      background: rgba(224, 184, 119, 0.10) !important;
+    }
+
+    .project-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: var(--ice);
+      background: rgba(127, 196, 214, 0.14);
+    }
+
+    /* ── Project Detail ── */
+    .project-detail {
+      padding: 0 1.6rem 1.6rem;
+    }
+
+    .project-detail-section {
+      margin-bottom: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+    }
+    .project-detail-section:last-child { margin-bottom: 0; }
+
+    .project-detail-heading {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ice);
+      margin-bottom: 0.4rem;
+    }
+
+    .project-detail-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #ccd0d6;
+      line-height: 1.95;
+      max-width: 62ch;
+    }
+
+    .project-entry:hover {
+      transform: translateY(-4px);
+      border-color: rgba(127, 196, 214, 0.55);
+      box-shadow: 0 0 0 1px rgba(127, 196, 214, 0.35), 0 14px 36px rgba(0, 0, 0, 0.45), 0 0 22px rgba(127, 196, 214, 0.16);
+    }
+
+    /* ── Certs ── */
+    .cert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .cert-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.9rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .cert-item:last-child { border-bottom: none; }
+
+    .cert-name { color: var(--text); font-weight: 500; }
+    .cert-year { font-size: 0.72rem; font-weight: 500; color: #a9aeb8; letter-spacing: 0.08em; }
+
+    /* ── Contact ── */
+    .contact-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .contact-line {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      padding: 0.55rem 0;
+      transition: color 0.2s;
+    }
+    .contact-line:hover .contact-value { color: var(--ice); }
+
+    .contact-link-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #a9aeb8;
+      min-width: 72px;
+      flex-shrink: 0;
+    }
+
+    .contact-value { word-break: break-all; }
+
+    .contact-icons {
+      display: flex;
+      gap: 0.9rem;
+      margin: 1.2rem 0 0.4rem;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      color: var(--ice);
+      border: 1px solid var(--panel-border);
+      background: rgba(255, 255, 255, 0.04);
+      transition: transform 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+    .icon-btn svg { width: 22px; height: 22px; fill: currentColor; display: block; }
+    .icon-btn:hover {
+      color: #ffffff;
+      transform: translateY(-3px);
+      background: rgba(127, 196, 214, 0.14);
+      box-shadow: 0 0 0 1px rgba(127, 196, 214, 0.5), 0 0 18px rgba(127, 196, 214, 0.28);
+    }
+    .icon-btn:focus-visible {
+      outline: 2px solid var(--ice);
+      outline-offset: 3px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 2.5rem 0;
+      border-top: 1px solid var(--line);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #a2a7b1;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0.001s !important;
+      }
+      html { scroll-behavior: auto; }
+      .star { animation: none !important; opacity: 0.45; }
+      .project-entry:hover,
+      .icon-btn:hover { transform: none; }
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 500px) {
+      body { padding: 0 1.1rem; }
+      section { padding: 2.8rem 0; }
+      .skill-marquees { gap: 1.3rem; }
+      .nav-right { gap: 1rem; }
+      .nav-links { gap: 1.2rem; }
+      .project-item { padding: 1.3rem 1.2rem 1rem; }
+      .project-detail { padding: 0 1.2rem 1.3rem; }
+      .project-entry { border-radius: 14px; }
+      .contact-link-label { min-width: 64px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="starfield" id="starfield" aria-hidden="true"></div>
+  <div class="scroll-progress" aria-hidden="true"><span class="scroll-progress__bar"></span></div>
+
+  <div class="container">
+
+    <nav>
+      <a class="nav-logo" href="#">Kazuma</a>
+      <div class="nav-right">
+        <ul class="nav-links">
+          <li><a href="#projects">Works</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button type="button" id="langToggle" class="lang-toggle" aria-pressed="false" aria-label="Switch to English">
+          <span class="lang-toggle-thumb"></span>
+          <span class="lang-toggle-option lang-toggle-option--ja">JA</span>
+          <span class="lang-toggle-option lang-toggle-option--en">EN</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="hero">
+      <p class="hero-label">Portfolio</p>
+      <h1>Building things<br>with curiosity.</h1>
+      <p class="hero-desc" data-en="3rd-year student, Dept. of Information Engineering, Faculty of Engineering, Kyoto Tachibana University — Class of 2028 / Kazuma Hamada">
+        京都橘大学 工学部 情報工学科 3年生 28卒　濱田和磨-Kazuma Hamada
+      </p>
+    </div>
+
+    <section id="about">
+      <p class="section-label">About</p>
+      <p class="about-text" data-en="Majoring in Information Engineering at Kyoto Tachibana University. The rapid evolution of generative AI sparked a deep interest in AI and machine learning, leading me to earn the G Kentei certification. I'm building development experience by actually building products and confronting the challenges that only become visible through that process. My goal is to work globally in the AI field, so I'm also studying English along the way.">
+        京都橘大学で情報系を専攻。生成AIの進化をきっかけにAI・機械学習への関心が深まり、
+        G検定取得、実際にプロダクトを作ることでしか見えてこない課題と向き合いながら開発経験を積んでいます。
+        将来はAI分野でグローバルに活躍することを目標に、英語学習にも取り組み中。
+      </p>
+    </section>
+
+    <section id="skills">
+      <p class="section-label">Skills</p>
+      <div class="skill-marquees" id="skillMarquees">
+
+        <div class="skill-cat">
+          <span class="skill-cat__label">Language</span>
+          <div class="marquee">
+            <div class="chip-list">
+              <span class="chip"><img src="https://cdn.simpleicons.org/python/4B8BBE" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Python</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/typescript/3178C6" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">TypeScript</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/javascript/F7DF1E" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">JavaScript</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-cat">
+          <span class="skill-cat__label">Framework</span>
+          <div class="marquee">
+            <div class="chip-list">
+              <span class="chip"><img src="https://cdn.simpleicons.org/nextdotjs/FFFFFF" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Next.js</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/react/61DAFB" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">React Native</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/fastapi/009688" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">FastAPI</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/expo/FFFFFF" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Expo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-cat">
+          <span class="skill-cat__label">AI / ML</span>
+          <div class="marquee">
+            <div class="chip-list">
+              <span class="chip"><img src="https://cdn.simpleicons.org/googlegemini/8E75B2" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Gemini API</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/claude/D97757" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Claude API</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/ollama/FFFFFF" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Ollama</span>
+              <span class="chip"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#c7ccd3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg>OCR</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-cat">
+          <span class="skill-cat__label">Infra</span>
+          <div class="marquee">
+            <div class="chip-list">
+              <span class="chip"><img src="https://cdn.simpleicons.org/supabase/3FCF8E" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Supabase</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/firebase/FFCA28" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">Firebase</span>
+              <span class="chip"><img src="https://cdn.simpleicons.org/github/FFFFFF" alt="" width="20" height="20" loading="lazy" onerror="this.remove()">GitHub</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="projects">
+      <p class="section-label">Works</p>
+      <div class="projects">
+
+        <div class="project-entry">
+          <a class="project-item" href="https://github.com/HK-Kazuma/rakuraku-chatapp" target="_blank">
+            <div>
+              <div class="project-head">
+                <p class="project-name" data-en="Rakuraku Shinsotsu Chat">楽楽新卒Chat</p>
+                <span class="project-place project-place--intern" data-en="Internship">インターン</span>
+              </div>
+              <p class="project-desc" data-en="A chat app for new-grad recruiting staff, built during a 3-day internship — from persona design through requirements definition based on client interviews. I was mainly responsible for the frontend implementation.">
+                新卒採用担当者をターゲットにしたチャットアプリ。3日間のインターンで、顧客ヒアリングをもとにペルソナ設計から要件定義まで行い開発した。
+                主にフロントエンド実装を担当。
+              </p>
+              <div class="project-stack">
+                <span class="tag">Vue.js</span>
+                <span class="tag">Vuetify</span>
+                <span class="tag">Socket.IO</span>
+                <span class="tag">Vite</span>
+              </div>
+            </div>
+            <span class="project-arrow">↗</span>
+          </a>
+          <div class="project-detail">
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Why I built it">なぜ作ったか</p>
+              <p class="project-detail-text" data-en="A 3-day internship project to build a chat app for new-grad recruiting staff, designing personas and requirements around what the target users actually needed. In that short timeframe, we dug into where the client's workflow had bottlenecks and what 'thoughtful support' meant to them, moving discussions forward by setting assumptions on anything unclear. I learned that real problem-solving means digging past surface-level complaints to the deeper goal behind them.">
+                新卒採用担当者をターゲットに、ペルソナやアプリ要件からターゲットが本当に求めるチャットアプリを開発するインターン課題。顧客の業務フローのどこにボトルネックがあるか、顧客の言う「丁寧な対応」とは何かを3日間という短い時間の中で突き詰め、曖昧な点は仮定を置いて議論を前に進めることを意識した。表面的な課題ではなく、顧客が困っていることの奥にある本当の目的まで深掘りすることが本当の課題解決だと学んだ。
+              </p>
+            </div>
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Key design choices">工夫した点</p>
+              <p class="project-detail-text" data-en="As the lead on frontend implementation, I also took on interview note-taking and building presentation materials — without a specialized skill of my own, I focused on scanning the whole project for open roles and stepping into them. Given the short timeline, I prioritized thorough discussion at the planning stage to avoid rework later.">
+                フロントエンド実装を主担当としつつ、ヒアリング時の書記や発表資料作成など、特化したスキルがないからこそ全体を俯瞰して空いている役割を率先して引き受けるようにした。短い開発期間で手戻りを避けるため、プランニング段階での議論に特に注力した。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-entry">
+          <a class="project-item" href="https://github.com/HK-Kazuma/Samurai-meet_demo" target="_blank">
+            <div>
+              <div class="project-head">
+                <p class="project-name">Samurai Meet</p>
+                <span class="project-place project-place--hackathon" data-en="Hackathon">ハッカソン</span>
+              </div>
+              <p class="project-desc" data-en="A real-time matching app connecting visiting foreigners with Japanese locals for in-person meetups, built by a 6-person team over about 3 weeks. I worked on the backend, including location-based real-time proximity matching and chat.">
+                来日外国人と日本人がリアルで交流できるマッチングアプリ。6人チームで約3週間かけて開発。
+                バックエンドを担当し、位置情報を用いたリアルタイム近接マッチングとチャット機能を実装。
+              </p>
+              <div class="project-stack">
+                <span class="tag">Go</span>
+                <span class="tag">TypeScript</span>
+                <span class="tag">PostgreSQL</span>
+                <span class="tag">WebTransport</span>
+                <span class="tag">WebSocket</span>
+                <span class="tag">Expo</span>
+              </div>
+            </div>
+            <span class="project-arrow">↗</span>
+          </a>
+          <div class="project-detail">
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Why I built it">なぜ作ったか</p>
+              <p class="project-detail-text" data-en="Built by a 6-person team over about 3 weeks for a hackathon themed 'Connect the AI era, create new value.' Drawing on the team's own experience and a survey, we focused on the psychological barrier of wanting to talk to foreigners but being too scared or anxious to approach them, aiming to turn that into real in-person interaction.">
+                「AI時代をつなぐ、新しい価値を創れ」というテーマのもと、6人チームで約3週間かけて開発したハッカソン作品。チームの経験とアンケートから、「外国人と話したいが、話しかけるのが怖い・不安」という心理的障壁に着目し、実際の交流につなげることを目指した。
+              </p>
+            </div>
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Key design choices">工夫した点</p>
+              <p class="project-detail-text" data-en="I built the backend with Go, PostgreSQL, and HTTP/3 WebTransport, and worked with one other member to implement real-time proximity matching based on location data. For safety, we never show raw location — instead we display area-based counts like '3 people within 500m.' Chat was implemented with WebSocket using a hub pattern for real-time communication. With only 3 weeks to finish, we prioritized features and scoped the implementation accordingly.">
+                バックエンドはGo・PostgreSQL・HTTP/3 WebTransportで構築し、メンバーと2人で位置情報を用いたリアルタイム近接マッチングを実装。位置情報を直接表示せず「500m以内に3人」のようにエリア単位で表示する安全設計を採用した。チャット機能はWebSocketとHubパターンでリアルタイム通信を実装。3週間という限られた期間で完成させるため、機能の優先順位を決めて実装範囲を取捨選択した。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-entry">
+          <a class="project-item" href="https://github.com/HK-Kazuma/AI-dailynews.git" target="_blank">
+            <div>
+              <div class="project-head">
+                <p class="project-name">Daily News Digest</p>
+                <span class="project-place project-place--personal" data-en="Personal">個人</span>
+              </div>
+              <p class="project-desc" data-en="A tool that automatically sends news on topics I'm interested in to Gmail every morning at 7 AM. It runs on a schedule via GitHub Actions, with the Claude Haiku API handling article selection, summarization, and translation.">
+                毎朝7時に興味のあるトピックのニュースをGmailに自動送信するツール。
+                GitHub Actionsで定期実行し、Claude Haiku APIで記事の選定・要約・翻訳を行う。
+              </p>
+              <div class="project-stack">
+                <span class="tag">Python</span>
+                <span class="tag">Claude API</span>
+                <span class="tag">GitHub Actions</span>
+                <span class="tag">RSS</span>
+              </div>
+            </div>
+            <span class="project-arrow">↗</span>
+          </a>
+          <div class="project-detail">
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Why I built it">なぜ作ったか</p>
+              <p class="project-detail-text" data-en="There were two motivations: gathering information to decide on a research topic, and wanting daily exposure to the latest technology. By staying on top of the latest AI news, I aimed to grasp global trends, identify what's currently in demand or concerning, and connect that to problems around me — ultimately to find a theme worth solving.">
+                研究テーマを決めるための情報収集と、最新技術に日常的に触れたいという2つの動機がある。AI関連の最新情報を得ることで、世界的な潮流を把握し、今求められていることや懸念点を抽出して自分の身の回りの課題と結びつけることで、解決すべきテーマを見出すことを目的とした。
+              </p>
+            </div>
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Key design choices">工夫した点</p>
+              <p class="project-detail-text" data-en="I tuned the tool to fetch a balanced mix of global and Japanese news. Too many articles kills the motivation to read, so I designed it to keep the volume light enough to sustain as a daily habit.">
+                グローバルなニュースと日本のニュースを同程度のバランスで取得するよう調整した。ニュースの数が多すぎると読む意欲が薄れてしまうため、継続を目的として負担のない量に絞る設計にした。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-entry">
+          <a class="project-item" href="https://github.com/HK-Kazuma/F1-prediction_app" target="_blank">
+            <div>
+              <div class="project-head">
+                <p class="project-name">F1-Prediction-app</p>
+                <span class="project-place project-place--personal" data-en="Personal">個人</span>
+              </div>
+              <p class="project-desc" data-en="An app that predicts Formula 1 race results. Using historical race data, the AI predicts each driver's finishing position.">
+                Fomular1のレース結果を予測するアプリ。過去のレースデータをもとに、AIが各ドライバーの順位を予測する。
+              </p>
+              <div class="project-stack">
+                <span class="tag">XGBoost</span>
+                <span class="tag">Scikit-learn</span>
+                <span class="tag">FastF1</span>
+                <span class="tag">OpenF1</span>
+                <span class="tag">FastAPI</span>
+                <span class="tag">Streamlit</span>
+                <span class="tag tag--wip" data-en="Ongoing">継続開発中</span>
+              </div>
+            </div>
+            <span class="project-arrow">↗</span>
+          </a>
+          <div class="project-detail">
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Why I built it">なぜ作ったか</p>
+              <p class="project-detail-text" data-en="I wanted to build something that combined my hobby with technology I'm interested in. The idea came from an F1-related GitHub repository I came across on LinkedIn.">
+                自分の趣味と興味のある技術を組み合わせて何かプロダクトを作りたかったから。LinkedInで見かけたF1に関するプロダクトのGithubリポジトリから本アイデアを思い付いた。
+              </p>
+            </div>
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Key design choices">工夫した点</p>
+              <p class="project-detail-text" data-en="To improve the prediction model's accuracy, I focused heavily on feature engineering. Since race data is massive, I chose a model that supports parallel processing. In F1 especially, the amount of data varies by driver, and race conditions change frequently — meaning data can sometimes be insufficient or structurally inconsistent. I judged this model to be the best fit for minimizing the preprocessing burden.">
+                予測モデルの精度を上げるため、特徴量エンジニアリングに注力した。レースデータが膨大なため、並列処理ができるモデルを採用。特にF1ではドライバーによってデータの量が違う。またレース状況も変わりやすいため、十分なデータを取れない場合や、データの構造が不揃いになることもある。そのため前処理の負担を減らすために最適と判断。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-entry">
+          <a class="project-item" href="https://github.com/geekcamp-meatpie/meat-recipe.git" target="_blank">
+            <div>
+              <div class="project-head">
+                <p class="project-name" data-en="AI Recipe Suggestion App">AI料理提案アプリ</p>
+                <span class="project-place project-place--team" data-en="Team">チーム開発</span>
+              </div>
+              <p class="project-desc" data-en="A PWA app where AI generates recipes from a photo of what's in your fridge. Built with a 4-person team; I was involved from the design phase.">
+                冷蔵庫の食材写真をもとにAIがレシピを生成するPWAアプリ。4人チーム開発。設計段階から参加。
+              </p>
+              <div class="project-stack">
+                <span class="tag">TypeScript</span>
+                <span class="tag">FastAPI</span>
+                <span class="tag">Gemini API</span>
+                <span class="tag">PWA</span>
+                <span class="tag tag--wip" data-en="In Progress">開発中</span>
+              </div>
+            </div>
+            <span class="project-arrow">↗</span>
+          </a>
+          <div class="project-detail">
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Why I built it">なぜ作ったか</p>
+              <p class="project-detail-text" data-en="I wanted to build on my team-development experience from Meatlist and take on a more serious product. It's aimed at homemakers and people living alone — students and working adults — who struggle to plan daily meals, supporting home cooking and reducing the food that goes unused and sits forgotten in the fridge.">
+                Meatlistでのチーム開発経験を活かし、より本格的なプロダクト開発に挑戦するため。毎日の献立を考えるのが大変な主婦や一人暮らしの社会人・学生に向けて自炊をサポートし、買ったものの使い切れず冷蔵庫に眠ったままになる食材を減らすことを目的としている。
+              </p>
+            </div>
+            <div class="project-detail-section">
+              <p class="project-detail-heading" data-en="Key design choices">工夫した点</p>
+              <p class="project-detail-text" data-en="Since this was a team project, I got involved in the database design from the ground up to prevent mismatches in how data was passed around. I proposed FastAPI and the Gemini API — technologies I'd already used in solo projects — chosen with the whole team's development efficiency in mind.">
+                チーム開発のため、DB設計に基礎から関与することでデータの受け渡しに齟齬が生じないようにした。技術スタックは個人開発で経験のあったFastAPIやGemini APIを提案し、チーム全体の開発効率を考慮して選定した。
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="certs">
+      <p class="section-label">Certifications</p>
+      <div class="cert-list">
+        <div class="cert-item">
+          <span class="cert-name" data-en="G Kentei (JDLA Generalist Certification)">G検定（ジェネラリスト検定）</span>
+          <span class="cert-year">JDLA</span>
+        </div>
+        <div class="cert-item">
+          <span class="cert-name" data-en="Assistant Construction Management Engineer, Grade 2">2級建築施工管理技士補</span>
+          <span class="cert-year" data-en="National Qualification (Japan)">国家資格</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <p class="section-label">Contact</p>
+      <div class="contact-wrap">
+        <a class="contact-line" href="mailto:astonmartin3924@gmail.com">
+          <span class="contact-link-label">Email</span>
+          <span class="contact-value">astonmartin3924@gmail.com</span>
+        </a>
+
+        <div class="contact-icons">
+          <a class="icon-btn" href="https://www.linkedin.com/in/kazuma-hamada05/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+          </a>
+          <a class="icon-btn" href="https://github.com/hk-kazuma" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.2 3.44 9.6 8.21 11.16.6.11.82-.25.82-.56 0-.28-.01-1.02-.02-2-3.34.71-4.04-1.58-4.04-1.58-.55-1.37-1.34-1.74-1.34-1.74-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.21 1.84 1.21 1.07 1.8 2.81 1.28 3.5.98.11-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.83 0-1.29.47-2.34 1.24-3.17-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.21a11.6 11.6 0 0 1 3-.4c1.02 0 2.05.14 3 .4 2.28-1.53 3.29-1.21 3.29-1.21.66 1.66.24 2.88.12 3.18.77.83 1.23 1.88 1.23 3.17 0 4.53-2.8 5.53-5.48 5.82.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .31.21.68.83.56A12.02 12.02 0 0 0 24 12.29C24 5.78 18.63.5 12 .5Z"/></svg>
+          </a>
+        </div>
+
+        <a class="contact-line" href="https://hk-kazuma.github.io/#" target="_blank" rel="noopener noreferrer">
+          <span class="contact-link-label">Portfolio</span>
+          <span class="contact-value">https://hk-kazuma.github.io/#</span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      © 2026 Kazuma. Built with HTML & CSS.
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = 'site-lang';
+      var toggleBtn = document.getElementById('langToggle');
+
+      function setLang(lang) {
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-en]').forEach(function (el) {
+          if (!el.dataset.ja) {
+            el.dataset.ja = el.textContent;
+          }
+          el.textContent = lang === 'en' ? el.dataset.en : el.dataset.ja;
+        });
+      }
+
+      function applyLang(lang) {
+        setLang(lang);
+        toggleBtn.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
+        toggleBtn.setAttribute('aria-label', lang === 'en' ? 'Switch to Japanese' : 'Switch to English');
+        try {
+          localStorage.setItem(STORAGE_KEY, lang);
+        } catch (e) {}
+      }
+
+      toggleBtn.addEventListener('click', function () {
+        var current = document.documentElement.lang === 'en' ? 'en' : 'ja';
+        applyLang(current === 'en' ? 'ja' : 'en');
+      });
+
+      var saved = 'ja';
+      try {
+        saved = localStorage.getItem(STORAGE_KEY) || 'ja';
+      } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ── Starfield generator ── */
+    (function () {
+      var field = document.getElementById('starfield');
+      if (!field) return;
+
+      var COUNT = 120;
+      var frag = document.createDocumentFragment();
+
+      for (var i = 0; i < COUNT; i++) {
+        var s = document.createElement('span');
+        s.className = 'star';
+
+        var r = Math.random();
+        if (r > 0.94) s.className += ' star--gold';
+        else if (r > 0.88) s.className += ' star--ice';
+
+        var size = Math.random() < 0.82
+          ? (Math.random() * 0.9 + 0.7)   /* 0.7 – 1.6px : most stars */
+          : (Math.random() * 1.4 + 1.8);  /* 1.8 – 3.2px : a few larger */
+        if (size > 2.4) s.className += ' star--bright';
+
+        s.style.width = size.toFixed(2) + 'px';
+        s.style.height = size.toFixed(2) + 'px';
+        s.style.left = (Math.random() * 100).toFixed(2) + '%';
+        s.style.top = (Math.random() * 100).toFixed(2) + '%';
+        s.style.setProperty('--dur', (Math.random() * 4 + 3).toFixed(2) + 's');
+        s.style.setProperty('--delay', (Math.random() * 6).toFixed(2) + 's');
+
+        frag.appendChild(s);
+      }
+      field.appendChild(frag);
+    })();
+
+    /* ── Skills marquees ── */
+    (function () {
+      var marquees = Array.prototype.slice.call(document.querySelectorAll('#skillMarquees .marquee'));
+      if (!marquees.length) return;
+
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+
+      marquees.forEach(function (mq) {
+        mq._baseHTML = mq.querySelector('.chip-list').innerHTML;
+      });
+
+      function build(mq, index) {
+        var list = mq.querySelector('.chip-list');
+        mq.classList.remove('is-live', 'marquee--reverse');
+        list.style.removeProperty('animation-duration');
+        list.innerHTML = mq._baseHTML;
+
+        var gap = parseFloat(getComputedStyle(list).columnGap) || 11.2;
+        var base = Array.prototype.slice.call(list.children);
+        var baseWidth = base.reduce(function (w, el) {
+          return w + el.getBoundingClientRect().width + gap;
+        }, 0);
+        if (baseWidth <= 0) return;
+
+        var viewport = mq.clientWidth || 320;
+
+        /* one group must be at least as wide as the viewport for a seamless loop */
+        var repeats = 1;
+        while (baseWidth * repeats < viewport + 80) repeats++;
+
+        function makeGroup(hidden) {
+          var g = document.createElement('div');
+          g.className = 'marquee-group';
+          if (hidden) g.setAttribute('aria-hidden', 'true');
+          for (var r = 0; r < repeats; r++) {
+            base.forEach(function (el) { g.appendChild(el.cloneNode(true)); });
+          }
+          return g;
+        }
+
+        list.innerHTML = '';
+        list.appendChild(makeGroup(false));
+        list.appendChild(makeGroup(true));
+
+        var groupWidth = baseWidth * repeats;
+        var dur = Math.max(16, groupWidth / 55); /* ~55px per second */
+        list.style.animationDuration = dur.toFixed(1) + 's';
+
+        if (index % 2 === 1) mq.classList.add('marquee--reverse');
+        mq.classList.add('is-live');
+      }
+
+      function buildAll() {
+        marquees.forEach(build);
+      }
+
+      buildAll();
+
+      var t;
+      window.addEventListener('resize', function () {
+        clearTimeout(t);
+        t = setTimeout(buildAll, 200);
+      });
+    })();
+
+    /* ── Scroll progress ── */
+    (function () {
+      var bar = document.querySelector('.scroll-progress__bar');
+      if (!bar) return;
+      var ticking = false;
+
+      function update() {
+        var doc = document.documentElement;
+        var max = doc.scrollHeight - doc.clientHeight;
+        var p = max > 0 ? (doc.scrollTop / max) * 100 : 0;
+        bar.style.setProperty('--sp', p.toFixed(2) + '%');
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          window.requestAnimationFrame(update);
+          ticking = true;
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    })();
+  </script>
+</body>
+</html>
